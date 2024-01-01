@@ -4,6 +4,7 @@ import datetime
 import wikipedia
 import webbrowser
 import os
+import smtplib
 
 engine = pyttsx3.init('sapi5')
 voices= engine.getProperty('voices')
@@ -38,14 +39,20 @@ def takeCommand():
         audio = r.listen(source)
     try:
         print('Recognizing.......')
-        query = r.recognize(audio, language='en-in')
+        query = r.recognize_google(audio, language='en-in')
         print(f'User Said{query}\n')
     except Exception as e:
         print(e)
         print("Say That Again Please!!!!")
         return "None"
     return query
-
+def sendEmail(to,content): # first enable settings for less secured apps
+    server = smtplib.SMTP('smtp.gmail.com',587)
+    server.ehlo()
+    server.starttls()
+    server.login('youremail@gmail.com','yourpassword')
+    server.sendmail('yourmail@gmail.com', to, content)
+    server.close()
 
 if __name__=="__main__":
     wishMe()
@@ -72,7 +79,29 @@ if __name__=="__main__":
         webbrowser.open('stackoverflow.com')
 
     elif "play music" in query:
-        music_dir= "D:\\something not that imp\\wow"
+        music_dir= "Enter_The_Path_to_your_Music_Directory"
         songs= os.listdir(music_dir)
         print(songs)
         os.startfile(os.path.join(music_dir,songs[0]))
+
+    elif "the time" in query:
+        strTime = datetime.datetime.now().strftime('%H:%M:%S')
+        speak(f"Sir, The Time Is {strTime}")
+
+    elif "open code" in query:
+        codePath = "Enter_Your_VS_Code_Path"
+        os.startfile(codePath)
+
+    elif "email to utsav" in query:
+        try:
+            speak("What Should I Say ?")
+            content = takeCommand()
+            to="youremail@gmail.com"
+            sendEmail(to, content)
+            speak("Email Has been Sent")
+        except Exception as e:
+            print(e)
+            speak("Sorry My Friend Utsav, I am Not Able to send this email....")
+
+    if "quit" in query:
+        exit()
